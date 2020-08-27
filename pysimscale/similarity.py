@@ -48,40 +48,6 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     return m
 
 
-# def dictlist2sparse_(l, filter_nan=True, diag_value=0):
-#     '''Convert a list of dictionaries `[{'rows': [], 'cols': [], 'data': []}, ...]` into a Scipy COO sparse matrix
-#
-#     Params:
-#     - l: list of dictionaries with the structure {'rows': [], 'cols': [], 'data': []}, typically coming from a Scipy COO matrix data
-#     - filter_nan: Should `nan` values be converted to 0. Default is True
-#     - diag_value: What value should be assigned to the diagonal (None means no assignment). Default is 0
-#     '''
-#     n = len(l)
-#     l_range = range(n)
-#
-#     sim_dict = {'rows': [], 'cols': [], 'data': []}
-#     for i in l_range:
-#         sim_dict['rows'].extend((l[i].row + i).tolist())
-#         sim_dict['cols'].extend(l[i].col.tolist())
-#         sim_dict['data'].extend(l[i].data.tolist())
-#
-#     if filter_nan:
-#         nan_filter = ~isnan(sim_dict['data'])
-#         sim_dict = {
-#             'rows': [i for (i,v) in zip(sim_dict['rows'], nan_filter) if v],
-#             'cols': [i for (i,v) in zip(sim_dict['cols'], nan_filter) if v],
-#             'data': [i for (i,v) in zip(sim_dict['data'], nan_filter) if v],
-#         }
-#
-#     m = coo_matrix((sim_dict['data'], (sim_dict['rows'], sim_dict['cols'])), shape=(n, n))
-#
-#     if diag_value is not None:
-#         m.setdiag(diag_value)
-#
-#     m.eliminate_zeros()
-#     return m
-
-
 def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, safe_dtype='int64'):
     '''Calculate similarity measures between rows of a 2D Numpy array or a Pandas series of lists
 
