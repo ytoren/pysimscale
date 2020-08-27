@@ -9,6 +9,13 @@ from numpy import array, allclose
 from scipy.sparse import coo_matrix
 from pysimscale import truncated_sparse_similarity
 
+
+def test_sim_wrong_structure():
+    a0 = array([[1, 1, 1, 1], None,[2.2, 2, 2.2, 0.5]], dtype='object')
+    with pytest.raises(TypeError):
+        truncated_sparse_similarity(a0, metric='cosine', n_jobs=1)
+
+
 a1 = array([[1, 1, 1, 1], [0, 1, 0, 2],[2.2, 2, 2.2, 0.5]])
 expected_cosine_sim = array([[1.0, 0.6708204, 0.9243651], [0.6708204, 1.0, 0.3594684], [0.9243651, 0.3594684, 1]])
 # coo_matrix(expected_cosine_sim)

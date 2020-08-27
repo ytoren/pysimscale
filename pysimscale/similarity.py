@@ -48,7 +48,7 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     return m
 
 
-def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, safe_dtype='int64'):
+def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='int64'):
     '''Calculate similarity measures between rows of a 2D Numpy array or a Pandas series of lists
 
     Params:
@@ -63,10 +63,13 @@ def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, b
               * Installed: Default is -1,  which means `cpu_count() - 1`
               * Not installed: Default is 1, which means simple python loops.
               * You can force a number at your own risk
-    - safe_dtype: if the array's `dtype` is not `boolean`, `int32/64`, `float32/64` then the function will try and convert the array to this type. Defaults to `float64` which should cover most cases (but is not very memory efficient)
+    - dtype_fallcack: if the array's `dtype` is not `boolean`, `int32/64`, `float32/64` then the function will try and convert the array to this type. Defaults to `float64` which should cover most cases (but is not very memory efficient)
     '''
     if a.dtype not in ('bool', 'int32', 'int64', 'float32', 'float64'):
-        raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? Try using `simscale.util.allign2Darray`')
+        try:
+            a = a.astype(dtype_fallback)
+        except ValueError:
+            raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? Try using `simscale.util.allign2Darray`')
 
     N = a.shape[0]
 
