@@ -3,6 +3,7 @@ __all__ = ['truncated_sparse_similarity']
 from scipy.sparse import coo_matrix, vstack
 from numpy import matmul, isnan, clip
 from numpy.linalg import norm
+from math import ceil
 
 from importlib.util import find_spec
 
@@ -48,12 +49,13 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     return m
 
 
-def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='int64'):
+def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='int64'):
     '''Calculate similarity measures between rows of a 2D Numpy array or a Pandas series of lists
 
     Params:
     - a: A `numpy` matrix / array with one of the following types: `boolean`, `int32/64`, `float32/64`. All rows must have the same number of elements (you can use `simscale.util.allign2Darray` to ensure that)
     - metric: A string with the name of a built in metric (currently `cosine` and `hamming` are supported) or a function that takes two matrices and returns row-wise distnaces
+    - block_size: An integer. Maximal number of rows per block when breaking down the similarity calculation int o components. Default is 1, which means we calculate similarity one row at a time (against all other rows).
     - thresh: a lower threshold for similarity. Values under threshold are set to 0. Default is 0.9
     - diag_value: What value should be assigned to the diagonal (`None` means no assignment). Default is 0
     - filter_nan: Should `nan` values be converted to 0. Default is True
@@ -71,14 +73,15 @@ def truncated_sparse_similarity(a, metric='hamming', thresh=0.9, diag_value=0, b
         except ValueError:
             raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? Try using `simscale.util.allign2Darray`')
 
-    N = a.shape[0]
+    l = list(range(a.shape[0]))
+    blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
 
     if n_jobs == 1:
-        sim = [similarity_sparse_block_(a=a, ind_range=[i], metric=metric, thresh=thresh, binary=binary) for i in range(N)]
+        sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
     else:
         with Parallel(n_jobs=n_jobs) as p:
             f = delayed(similarity_sparse_block_)
-            sim = p(f(a=a, ind_range=[i], metric=metric, thresh=thresh, binary=binary) for i in range(N))
+            sim = p(f(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks)
 
     sim = vstack(sim)
 

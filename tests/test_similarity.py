@@ -31,6 +31,12 @@ def test_cosine_no_thresh():
         expected_cosine_sim
     )
 
+def test_cosine_block_no_thresh():
+    assert allclose(
+        truncated_sparse_similarity(a1, metric='cosine', block_size = 2, thresh=0, diag_value=None, n_jobs=1).todense(),
+        expected_cosine_sim
+    )
+
 def test_cosine_parallel():
     if HAS_JOBLIB:
         assert allclose(
