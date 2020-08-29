@@ -76,7 +76,10 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
     l = list(range(a.shape[0]))
     blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
 
-    if n_jobs == 1:
+    if n_jobs == 1 or DEFAULT_CPUS == 1:
+        if DEFAULT_CPUS == 1:
+            print('Could not find `joblib` library. Falling back to simple loops')
+        
         sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
     else:
         with Parallel(n_jobs=n_jobs) as p:

@@ -38,20 +38,32 @@ This package contains tools for handling this kind of the above problems.
 
 `a = array([[1, 1, 1, 1], [0, 1, 0, 2],[2.2, 2, 2.2, 0.5]])`
 
-To return the full similarity matrix (no thresholding):
+To return the full similarity matrix (no thresholding using a simple loop over the rows):
 
 ```
 sim = truncated_sparse_similarity(a1, metric='cosine', thresh=0, diag_value=None, n_jobs=1)
 print(sim.todense())
 ```
 
-More practically, we don't care about low similarity values (let's say <0.9) so we can use a sparse representation. We also don't need a diagonal of `1`s (save some memory), and we want to run this in parallel:
+More practically, we don't care about low similarity values (let's say <0.9) so we can use a sparse representation. We also don't need a diagonal of `1`s (save some memory)
 
 ```
-sim = truncated_sparse_similarity(a1, metric='cosine', thresh=0.0, diag_value=0, n_jobs=-1)
+sim = truncated_sparse_similarity(a1, metric='cosine', thresh=0.0, diag_value=0, n_jobs=1)
 print(sim.todense())
 ```
 
+Now let's do it in parallel! If we want to optimise the use of a single machine in our cluster we can send bigger "blocks" to the workers (instead of calculating 1 row at a time) using the `block_size` parameter.
+
+```
+sim = truncated_sparse_similarity(a1, block_size = 2, metric='cosine', thresh=0.0, diag_value=0, n_jobs=-1)
+print(sim.todense())
+```
+
+### Parallel calculations
+
+The package used for cluster computing is `joblib`, but it is not a dependency by design. When `joblib` is installed, the function will default to parallel calculations (`n_jobs=-1`). However, if the package is not installed then the function will fall back to simple loops, even if you try to force it through the `n_jobs` parameter (this is designed to allow deployment in less-than-ideal cluster environments)
+
+
 ### Pandas tools
 
-[Pandas](https://pandas.pydata.org/) is not a dependency for this package, but I did include some tools to handle series data. Especially cases where each row contains a vector but some contain `None/NAN/nan` values. See `print(series2array2D.__doc__)` for details.
+Similarly, [Pandas](https://pandas.pydata.org/) is not a dependency for this package, but I did include some tools to handle series data. Especially cases where each row contains a vector but some contain `None/NAN/nan` values. See `print(series2array2D.__doc__)` for details.
