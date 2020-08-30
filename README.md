@@ -7,6 +7,8 @@ Large scale similarity calculations with support for:
 
 * Parallel of calculations, using the [Joblib](https://github.com/joblib/joblib) package.
 
+* Quotient / Hierarchical similarity calculations, for cases where you want to group or aggregate the similarity graph to calculate similarity between higher level entities. For example similarity between users (higher level entity) derived from similarity between user reviews.
+
 ## Background
 
 A smart dev-ops engineer once told me:
@@ -62,6 +64,24 @@ print(sim.todense())
 ### Parallel calculations
 
 The package used for cluster computing is `joblib`, but it is not a dependency by design. When `joblib` is installed, the function will default to parallel calculations (`n_jobs=-1`). However, if the package is not installed then the function will fall back to simple loops, even if you try to force it through the `n_jobs` parameter (this is designed to allow deployment in less-than-ideal cluster environments)
+
+### Quotient similarity
+
+Let's assume we calculated similarity between a set of text embeddings (say using TF-IDF and cosine similarity) and now we want to "aggregate" those links to calculate similarity between a higher level entity like "users". We assume we have the one-to-many link user -> texts, and that we can re-arrange the rows of the similarity matrix so that all messages from the same users are adjacent column/row-wise.
+
+We first obtain the new order of the rows (which is in fact a permutation of the matrix rows) and sort the matrix using:
+
+```
+m_sorted = sim_matrix_shuffle(m ,row_order)
+```
+
+Next we can group together adjacent rows using another function. We use a "list-of-lists" approach: each user is represented as a list of indices from the original matrix, so that in total we have a proper `partition` of the sorted matrix:
+
+```
+m_users =quotient_similarity(m_sorted, partition, agg='sum')
+```
+
+The parameter `agg` is used to decide how we aggregate the values of the original matrix into the higher level matrix (see documentation for the available options).
 
 
 ### Pandas tools

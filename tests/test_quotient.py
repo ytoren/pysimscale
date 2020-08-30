@@ -1,6 +1,6 @@
 from numpy import allclose, array
 from scipy.sparse import csr_matrix, issparse
-from pysimscale import merge_row_partition
+from pysimscale import merge_row_partition, quotient_similarity, sort_partition
 
 partition = [[1, 2, 3], [4, 5], [0]]
 
@@ -26,18 +26,7 @@ m_merged = array([
 ])
 
 def test_row_merge():
-    assert allclose(merge_row_partition(m, partition, agg='sum').todense(), m_merge_rows)
+    assert allclose(merge_row_partition(m, sort_partition(partition), agg='sum').todense(), m_merge_rows)
 
 def test_full_merge():
-    assert allclose(
-        merge_row_partition(
-            merge_row_partition(
-                m,
-                partition,
-                agg='sum'
-            ).T,
-            partition,
-            agg='sum'
-        ).todense(),
-        m_merged
-    )
+    assert allclose(quotient_similarity(m, partition, agg='sum').todense(), m_merged)
