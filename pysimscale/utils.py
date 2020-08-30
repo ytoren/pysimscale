@@ -28,21 +28,16 @@ def is_partition(p):
     else:
         return False
 
-def is_sorted_partition(p, by=min, reverse=False):
-    '''Check that a "list of lists" `p` is (1) a partition and (2) sorted
+
+def sort_partition(p, by=min, reverse=False):
+    '''Sort a partition `p`
 
     Params:
     - p: list of lists of integers, representing a partition of the matching range
     - by: Function. Maps a list to a single value (real/integer) which is used to sort the lists in the partition
     - reverse: Direction of the sort (passed to `sorted`). Default is `False`
     '''
-    if is_partition(p):
-        if p == [y for x,y in sorted(zip(map(by, p), p), reverse=reverse)]:
-            return True
-        else:
-            return False
-    else:
-        return False
+    return [y for x,y in sorted(zip(map(by, p), p), reverse=reverse)]
 
 
 def series2array2D(s, none_treament='row', width=None, replicate=False):
