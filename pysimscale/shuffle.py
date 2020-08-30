@@ -15,3 +15,18 @@ def row_shuffle_matrix(permutation):
         raise ValueError('Input is not a permutation')
 
     return coo_matrix(([1] * len(permutation), (sorted(permutation), permutation)))
+
+
+def sim_matrix_shuffle(m, row_order):
+    '''Re-arrange a similarity matrix based on a new row order
+
+    Params:
+    - m: Similarity matrix. Can be dense (Numpy array / matrix) or sparse (as long as it supports arithmetic operations)
+    - row_order: A list of integers, which makes a permutation of the matrix rows
+
+    Returns: A re-ordered similarity matrix (type depends on the input type. Sparse should return sparse)
+    '''
+
+    sh = row_shuffle_matrix(row_order)
+
+    return sh * m * sh
