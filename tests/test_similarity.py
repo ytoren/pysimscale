@@ -1,29 +1,29 @@
 import pytest
 from importlib.util import find_spec
 
+from numpy import array, allclose
+from scipy.sparse import coo_matrix, issparse
+from pysimscale import truncated_sparse_similarity
+
 HAS_JOBLIB = False
 if find_spec('joblib') is not None:
     HAS_JOBLIB = True
 
-from numpy import array, allclose
-from scipy.sparse import coo_matrix
-from pysimscale import truncated_sparse_similarity
-
-
-def test_sim_wrong_structure():
-    a0 = array([[1, 1, 1, 1], None,[2.2, 2, 2.2, 0.5]], dtype='object')
-    with pytest.raises(TypeError):
-        truncated_sparse_similarity(a0, metric='cosine', n_jobs=1)
-
-
-a1 = array([[1, 1, 1, 1], [0, 1, 0, 2],[2.2, 2, 2.2, 0.5]])
-expected_cosine_sim = array([[1.0, 0.6708204, 0.9243651], [0.6708204, 1.0, 0.3594684], [0.9243651, 0.3594684, 1]])
+a1 = array([
+    [1, 1, 1, 1],
+    [0, 1, 0, 2],
+    [2.2, 2, 2.2, 0.5]
+])
+expected_cosine_sim = array([
+    [1.0, 0.6708204, 0.9243651],
+    [0.6708204, 1.0, 0.3594684],
+    [0.9243651, 0.3594684, 1]
+])
 # coo_matrix(expected_cosine_sim)
 
 def test_sim_wrong_metric():
     with pytest.raises(ValueError):
          truncated_sparse_similarity(a1, metric=None, n_jobs=1)
-
 
 def test_cosine_no_thresh():
     assert allclose(
@@ -45,6 +45,9 @@ def test_cosine_parallel():
         )
     else:
         print('Could not find a Joblib instalation, skipping test')
+
+def test_sim_sparsity():
+    assert issparse(truncated_sparse_similarity(a1, metric='cosine', thresh=0.9, diag_value=0, n_jobs=1))
 
 def test_cosine_thresh():
     sim_thresh = 0.9

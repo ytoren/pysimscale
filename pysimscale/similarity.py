@@ -65,13 +65,15 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
               * Installed: Default is -1,  which means `cpu_count() - 1`
               * Not installed: Default is 1, which means simple python loops.
               * You can force a number at your own risk
-    - dtype_fallcack: if the array's `dtype` is not `boolean`, `int32/64`, `float32/64` then the function will try and convert the array to this type. Defaults to `float64` which should cover most cases (but is not very memory efficient)
+    - dtype_fallback: if the array's `dtype` is not `boolean`, `int32/64`, `float32/64` then the function will try and convert the array to this type. Defaults to `float64` which should cover most cases (but is not very memory efficient)
+
+    Returns a sparse similarity matrix
     '''
     if a.dtype not in ('bool', 'int32', 'int64', 'float32', 'float64'):
         try:
             a = a.astype(dtype_fallback)
         except ValueError:
-            raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? Try using `simscale.util.allign2Darray`')
+            raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? If this is a Pandase series Try using `allign2Darray`')
 
     l = list(range(a.shape[0]))
     blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
@@ -79,7 +81,7 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
     if n_jobs == 1 or DEFAULT_CPUS == 1:
         if DEFAULT_CPUS == 1:
             print('Could not find `joblib` library. Falling back to simple loops')
-        
+
         sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
     else:
         with Parallel(n_jobs=n_jobs) as p:
