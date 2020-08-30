@@ -24,6 +24,14 @@ def test_is_partition():
     p = [[0], [1,2,3], [4,5]]
     assert is_partition(p)
 
+def test_is_partition():
+    p = [[10], [11,12,13], [14,15]]
+    assert is_partition(p, start=10)
+
+def test_not_partition():
+    p = [[10], [11,12,13], [14,15]]
+    assert not is_partition(p, start=10, end=16)    
+
 def test_not_partition1():
     p = [[0], [1,2], [4,5]]
     assert not is_partition(p)

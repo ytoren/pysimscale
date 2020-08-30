@@ -13,11 +13,16 @@ def is_permutation(p):
         return False
 
 
-def is_partition(p):
+def is_partition(p, start=None, end=None):
     '''Check that a "list of lists" `p` is a partition of the index range it applies to'''
     p_flat = sum(p, [])
-    if len(p_flat) == max(p_flat) + 1:
-        p_range = set(range(min(p_flat), max(p_flat) + 1, 1))
+    if start is None:
+        start = min(p_flat)
+    if end is None:
+        end = max(p_flat)
+
+    if len(p_flat) == end - start + 1:
+        p_range = set(range(start, end + 1, 1))
         if len(p_range.difference(set(p_flat))) == 0:
             if all([is_permutation(pi) for pi in p]):
                 return True
