@@ -2,6 +2,49 @@ from importlib.util import find_spec
 from numpy import stack, nan, unique, ones
 from scipy.sparse import block_diag
 
+def is_permutation(p):
+    '''Check that the integer vector `p` is a permutation of {min(p) ... max(p)}'''
+    if len(p) == max(p) - min(p) + 1:
+        if len(set(range(min(p), max(p) + 1, 1)).difference(set(p))) == 0:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def is_partition(p, start=None, end=None):
+    '''Check that a "list of lists" `p` is a partition of the index range it applies to'''
+    p_flat = sum(p, [])
+    if start is None:
+        start = min(p_flat)
+    if end is None:
+        end = max(p_flat)
+
+    if len(p_flat) == end - start + 1:
+        p_range = set(range(start, end + 1, 1))
+        if len(p_range.difference(set(p_flat))) == 0:
+            if all([is_permutation(pi) for pi in p]):
+                return True
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+
+
+def sort_partition(p, by=min, reverse=False):
+    '''Sort a partition `p`
+
+    Params:
+    - p: list of lists of integers, representing a partition of the matching range
+    - by: Function. Maps a list to a single value (real/integer) which is used to sort the lists in the partition
+    - reverse: Direction of the sort (passed to `sorted`). Default is `False`
+    '''
+    return [y for x,y in sorted(zip(map(by, p), p), reverse=reverse)]
+
+
 def series2array2D(s, none_treament='row', width=None, replicate=False):
     '''Convert a Pandas series containing arrays or list (and possibly rows with a single `None` value) into a "flat" 2D Numpy array
 
