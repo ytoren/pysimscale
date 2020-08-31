@@ -1,5 +1,5 @@
 from importlib.util import find_spec
-from numpy import stack, nan, unique, ones
+from numpy import stack, nan, unique, full
 from scipy.sparse import block_diag
 
 def is_permutation(p):
@@ -78,30 +78,31 @@ def series2array2D(s, none_treament='row', width=None, replicate=False):
     return stack(a)
 
 
-def block_matrix(l, diag_value=0):
+def id_block_matrix(ids, value=1, diag_value=None):
     '''Generate a block matrix of 1's based on a sorted list of IDs
 
     Params:
-    - l: A sorted list of IDs. Repeated ID's will generate a block of 1's in the matrix
+    - ids: A sorted list of IDs. Repeated ID's will generate a block of 1's in the matrix
     - diag_value: What value should be assigned to the diagonal (None means not assignment). Default is 0
 
     Usage: Add information from a higher hierarcy to the similarity matrix.
     '''
-    if l != sorted(l):
+    if ids != sorted(ids):
         raise ValueError('List must ne sorted to ensure additivity works')
 
-    l_unique, l_counts = unique(l, return_counts=True)
+    l_unique, l_counts = unique(ids, return_counts=True)
     block_list = []
     n_range = range(len(l_unique))
 
     for i in n_range:
         n_i = l_counts[i]
-        block_list.append(ones((n_i, n_i)))
+        block_list.append(full((n_i, n_i), value))
 
     if l_counts.tolist() != list(map(lambda x: x.shape[0], block_list)):
         raise ValueError('Counts do not match block sizes')
 
     result = block_diag(block_list)
+
     if diag_value is not None:
         result.setdiag(diag_value)
         result.eliminate_zeros()

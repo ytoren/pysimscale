@@ -86,4 +86,10 @@ The parameter `agg` is used to decide how we aggregate the values of the origina
 
 ### Pandas tools
 
-Similarly, [Pandas](https://pandas.pydata.org/) is not a dependency for this package, but I did include some tools to handle series data. Especially cases where each row contains a vector but some contain `None/NAN/nan` values. See `print(series2array2D.__doc__)` for details.
+Similarly, [Pandas](https://pandas.pydata.org/) is not a dependency for this package, but I did include some tools to handle series data. Specifically cases where each row contains a vector but some contain `None/NAN/nan` values. See `print(series2array2D.__doc__)` for details.
+
+### "One is enough" similarity
+
+If a single connection between the lower-level entities is enough to link the higher level entities (e.g. one similar text is enough to link two users) you can work around a lot of the complexity of the calculations by using the original graph. The key notion is that all the messages that belong to the same user are somehow "similar".
+
+The level of that similarity and how it relates to the text similarity is an open questions, but you can use the function `id_block_matrix` to generate a block matrix with a give value (typically 1) that represents this prior knowledge. Combining this matrix with the text similarity matrix (for example adding and capping values at 1) creates a similarity matrix that can be used for downstream operations (like connected components, clustering, etc.) without the need to reduce the dimension of the problem.

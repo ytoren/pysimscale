@@ -1,7 +1,7 @@
 import pytest
 from importlib.util import find_spec
 from numpy import array, nan, array_equal
-from pysimscale import is_permutation, is_partition, sort_partition, series2array2D
+from pysimscale import is_permutation, is_partition, sort_partition, series2array2D, id_block_matrix
 
 def test_is_permutation():
     p = [9,4,5,7,2,6,3,8,0,1]
@@ -30,7 +30,7 @@ def test_is_partition():
 
 def test_not_partition():
     p = [[10], [11,12,13], [14,15]]
-    assert not is_partition(p, start=10, end=16)    
+    assert not is_partition(p, start=10, end=16)
 
 def test_not_partition1():
     p = [[0], [1,2], [4,5]]
@@ -76,3 +76,9 @@ def test_series2array2D():
 
     else:
         print('Could not find a Pandas instalation, skipping test')
+
+def test_id_block_matrix_ones():
+    assert array_equal(
+        id_block_matrix([1,2,2,3]).todense(),
+        array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 1]])
+    )
