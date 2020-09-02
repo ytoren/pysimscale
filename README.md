@@ -78,7 +78,7 @@ m_sorted = sim_matrix_shuffle(m ,row_order)
 Next we can group together adjacent rows using another function. We use a "list-of-lists" approach: each user is represented as a list of indices from the original matrix, so that in total we have a proper `partition` of the sorted matrix:
 
 ```
-m_users =quotient_similarity(m_sorted, partition, agg='sum')
+m_users = quotient_similarity(m_sorted, partition, agg='sum')
 ```
 
 The parameter `agg` is used to decide how we aggregate the values of the original matrix into the higher level matrix (see documentation for the available options).
