@@ -93,3 +93,21 @@ Similarly, [Pandas](https://pandas.pydata.org/) is not a dependency for this pac
 If a single connection between the lower-level entities is enough to link the higher level entities (e.g. one similar text is enough to link two users) you can work around a lot of the complexity of the calculations by using the original graph. The key notion is that all the messages that belong to the same user are somehow "similar".
 
 The level of that similarity and how it relates to the text similarity is an open questions, but you can use the function `id_block_matrix` to generate a block matrix with a give value (typically 1) that represents this prior knowledge. Combining this matrix with the text similarity matrix (for example adding and capping values at 1) creates a similarity matrix that can be used for downstream operations (like connected components, clustering, etc.) without the need to reduce the dimension of the problem.
+
+## Benchmarks
+
+### Similarity
+
+Comparing run times of the [Scikit-learn cosine similarity](https://scikit-learn.org/stable/modules/metrics.html#cosine-similarity) function to our `truncated_sparse_similarity` function:
+
+![Similarty calculation benchmark](benchmarks/benchmark_similarity.png)
+
+[Code for simulation](benchmarks/benchmark_similarity.py)
+
+### Quotient Similarity
+
+Comparing the run times of the [Networkx quotient graph](https://networkx.github.io/documentation/stable/reference/algorithms/generated/networkx.algorithms.minors.quotient_graph.html) function to our `quotient_similarity` function:
+
+![Quotient calculation benchmark](benchmarks/benchmark_quotient.png)
+
+[Code for simulation](benchmarks/benchmark_quotient.py)
