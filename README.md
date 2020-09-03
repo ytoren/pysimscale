@@ -101,3 +101,13 @@ The level of that similarity and how it relates to the text similarity is an ope
 Comparing run times of the [Scikit-learn cosine similarity](https://scikit-learn.org/stable/modules/metrics.html#cosine-similarity) function to our `truncated_sparse_similarity` function:
 
 ![Similarty calculation benchmark](benchmarks/benchmark_similarity.png)
+
+[Code for simulation](benchmarks/benchmark_similarity.py)
+
+### Quotient Similarity
+
+Comparing the run times of the [Networkx quotient graph](https://networkx.github.io/documentation/stable/reference/algorithms/generated/networkx.algorithms.minors.quotient_graph.html) function to our `quotient_similarity` function:
+
+![Quotient calculation benchmark](benchmarks/benchmark_quotient.png)
+
+[Code for simulation](benchmarks/benchmark_quotient.py)
