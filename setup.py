@@ -1,6 +1,6 @@
 import setuptools
 
-def reademe():
+def readme():
     with open("README.md", "r") as fh:
         return fh.read()
 
