@@ -1,7 +1,7 @@
 from importlib.util import find_spec
 from numpy import allclose, array
 from scipy.sparse import csr_matrix, issparse
-from pysimscale import merge_row_partition, quotient_similarity, sort_partition
+from pysimscale import merge_row_partition, quotient_similarity
 
 if find_spec('networkx') is not None:
     HAS_NX = True
@@ -34,10 +34,13 @@ m_merged = array([
 
 
 def test_row_merge():
-    assert allclose(merge_row_partition(m, partition, agg='sum').todense(), m_merge_rows)
+    assert allclose(merge_row_partition(m, partition, 'sum', 1).todense(), m_merge_rows)
 
-def test_full_merge():
-    assert allclose(quotient_similarity(m, partition, agg='sum').todense(), m_merged)
+def test_full_merge_loop():
+    assert allclose(quotient_similarity(m, partition, agg='sum', n_cpu=1).todense(), m_merged)
+
+def test_full_merge_parallel():
+    assert allclose(quotient_similarity(m, partition, agg='sum', n_cpu=-1).todense(), m_merged)
 
 if HAS_NX:
     G = from_scipy_sparse_matrix(m)
