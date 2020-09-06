@@ -47,7 +47,7 @@ def similarity_sparse_block(a, ind_range, thresh, metric='hamming', binary=False
     return m
 
 
-def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='int64'):
+def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='float64'):
     '''Calculate similarity measures between rows of a 2D Numpy array or a Pandas series of lists
 
     Params:
@@ -70,8 +70,10 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
     if a.dtype not in ('bool', 'int32', 'int64', 'float32', 'float64'):
         try:
             a = a.astype(dtype_fallback)
-        except ValueError:
+        except TypeError:
             raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? If this is a Pandase series Try using `allign2Darray`')
+
+
 
     l = list(range(a.shape[0]))
     blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
