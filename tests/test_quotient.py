@@ -1,3 +1,4 @@
+import pytest
 from importlib.util import find_spec
 from numpy import allclose, array
 from scipy.sparse import csr_matrix, issparse
@@ -32,15 +33,41 @@ m_merged = array([
     [0.5, 0.1, 3.6]
 ])
 
+custom_agg = lambda m,p: csr_matrix(getattr(m[p, :], 'sum')(axis=0))
+
 
 def test_row_merge():
-    assert allclose(merge_row_partition(m, partition, 'sum', 1).todense(), m_merge_rows)
+    assert allclose(merge_row_partition(m, partition, custom_agg , 1).todense(), m_merge_rows)
 
-def test_full_merge_loop():
+def test_row_merge_parallel():
+    assert allclose(
+        merge_row_partition(m, partition, lambda m,p: csr_matrix(getattr(m[p, :], 'sum')(axis=0)), -1).todense(),
+        m_merge_rows
+    )
+
+
+def test_quotient_wrong_agg_str():
+    with pytest.raises(ValueError):
+        quotient_similarity(m, partition, agg='ABCD', n_cpu=1)
+
+def test_quotient_wrong_agg_else():
+    with pytest.raises(ValueError):
+        quotient_similarity(m, partition, agg=array([]), n_cpu=1)
+
+
+def test_quotient_loop():
     assert allclose(quotient_similarity(m, partition, agg='sum', n_cpu=1).todense(), m_merged)
 
-def test_full_merge_parallel():
+def test_quotient_parallel():
     assert allclose(quotient_similarity(m, partition, agg='sum', n_cpu=-1).todense(), m_merged)
+
+def test_quotient_custom():
+    assert allclose(quotient_similarity(m, partition, agg=custom_agg, n_cpu=-1).todense(), m_merged)
+
+def test_quotient_bad_partition():
+    with pytest.raises(ValueError):
+        quotient_similarity(m, partition=[[0,2], [3,7]], check=True)
+
 
 if HAS_NX:
     G = from_scipy_sparse_matrix(m)

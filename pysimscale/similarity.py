@@ -1,11 +1,8 @@
-__all__ = ['truncated_sparse_similarity']
-
+from importlib.util import find_spec
 from scipy.sparse import coo_matrix, vstack
 from numpy import matmul, isnan, clip
 from numpy.linalg import norm
 from math import ceil
-
-from importlib.util import find_spec
 
 if find_spec('joblib') is not None:
     from joblib import Parallel, delayed, cpu_count
@@ -14,7 +11,7 @@ else:
     print('Could not find `joblib` library. Parallelisation is disabled by default')
     DEFAULT_CPUS = 1
 
-def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None, binary=False, sparse=True, normalized=True):
+def similarity_sparse_block(a, ind_range, thresh, metric='hamming', binary=False, sparse=True, normalized=True):
     '''Calculate a Hamming similarity matrix (1 - distance) for a subset of indices (against the entire dataset).
 
     params:
@@ -29,10 +26,11 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     if metric == 'hamming':
         m = (1.0 * matmul(a[ind_range], a.T) + matmul((1 - a[ind_range]), (1 - a).T)) / a.shape[1]
     elif metric == 'cosine':
-        a = a / norm(a, ord=2, axis=1).reshape(a.shape[0], 1)
+        if normalized:
+            a = a / norm(a, ord=2, axis=1).reshape(a.shape[0], 1)
         m = matmul(a[ind_range], a.T)
     elif callable(metric):
-        m = metric(a[ind_range])
+        m = metric(a[ind_range], a)
     else:
         raise ValueError('Invalid value of `metric` parameter. Please use one of the built-in options of specify a function (see documentation)')
 
@@ -49,7 +47,7 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     return m
 
 
-def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='int64'):
+def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, diag_value=0, binary=False, n_jobs=DEFAULT_CPUS, dtype_fallback='float64'):
     '''Calculate similarity measures between rows of a 2D Numpy array or a Pandas series of lists
 
     Params:
@@ -72,20 +70,22 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
     if a.dtype not in ('bool', 'int32', 'int64', 'float32', 'float64'):
         try:
             a = a.astype(dtype_fallback)
-        except ValueError:
+        except TypeError:
             raise TypeError('Supported data types are `boolean`, `int32`, `int64`, `float32`, `float64`. Do all of your lines have the same number of items? Maybe there is `None` hiding somewhere? If this is a Pandase series Try using `allign2Darray`')
+
+
 
     l = list(range(a.shape[0]))
     blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
 
     if n_jobs == 1 or DEFAULT_CPUS == 1:
-        if DEFAULT_CPUS == 1:
+        if DEFAULT_CPUS == 1 and n_jobs != 1:
             print('Could not find `joblib` library. Falling back to simple loops')
 
-        sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
+        sim = [similarity_sparse_block(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
     else:
         with Parallel(n_jobs=n_jobs) as p:
-            f = delayed(similarity_sparse_block_)
+            f = delayed(similarity_sparse_block)
             sim = p(f(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks)
 
     sim = vstack(sim)
