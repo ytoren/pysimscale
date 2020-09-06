@@ -73,18 +73,10 @@ The level of that similarity and how it relates to the text similarity is an ope
 
 ### Quotient similarity
 
-Let's assume we calculated similarity between a set of text embeddings (say using TF-IDF and cosine similarity) and now we want to "aggregate" those links to calculate similarity between a higher level entity like "users". We assume we have the one-to-many link user -> texts, and that we can re-arrange the rows of the similarity matrix so that all messages from the same users are adjacent column/row-wise.
-
-We first obtain the new order of the rows (which is in fact a permutation of the matrix rows) and sort the matrix using:
+Let's assume we calculated similarity between a set of text embeddings (say using TF-IDF and cosine similarity) and now we want to "aggregate" those links to calculate similarity between a higher-level entity like "users". We assume we have the one-to-many link user -> texts. By grouping all the rows/columns that belong to the same higher-level entity we can derive higher-level similarity matrix [ref TBD]. We use a "list-of-lists" approach: each higher-level entity is represented as a list of indices from the original matrix, so that in total we have a proper `partition` of the sorted matrix:
 
 ```
-m_sorted = sim_matrix_shuffle(m ,row_order)
-```
-
-Next we can group together adjacent rows using another function. We use a "list-of-lists" approach: each user is represented as a list of indices from the original matrix, so that in total we have a proper `partition` of the sorted matrix:
-
-```
-m_users = quotient_similarity(m_sorted, partition, agg='sum')
+m_users = quotient_similarity(m, partition, agg='sum')
 ```
 
 The parameter `agg` is used to decide how we aggregate the values of the original matrix into the higher level matrix (see documentation for the available options).
