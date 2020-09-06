@@ -57,6 +57,7 @@ def test_unsorted_partition1():
     p = [[1,2,3], [0], [4,5]]
     assert not p == sort_partition(p, by=min)
 
+
 HAS_PANDAS = False
 
 if find_spec('pandas') is not None:
@@ -77,8 +78,25 @@ def test_series2array2D():
     else:
         print('Could not find a Pandas instalation, skipping test')
 
+
+def test_id_block_wrong_blocks():
+    with pytest.raises(ValueError):
+         id_block_matrix([2,1,2])
+
 def test_id_block_matrix_ones():
     assert array_equal(
         id_block_matrix([1,2,2,3]).todense(),
         array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 1]])
+    )
+
+def test_block_matrix_2():
+    assert array_equal(
+        id_block_matrix([1,1,2], value=2).todense(),
+        array([[2,2,0], [2,2,0], [0,0,2]])
+    )
+
+def test_block_matrix_2_diag0():
+    assert array_equal(
+        id_block_matrix([1,1,2], value=2, diag_value=0).todense(),
+        array([[0,2,0], [2,0,0], [0,0,0]])
     )
