@@ -107,4 +107,4 @@ def id_block_matrix(ids, value=1, diag_value=None):
         result.setdiag(diag_value)
         result.eliminate_zeros()
 
-    return block_diag(block_list)
+    return result
