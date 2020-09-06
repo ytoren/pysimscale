@@ -1,3 +1,4 @@
+import pytest
 from importlib.util import find_spec
 from numpy import allclose, array
 from scipy.sparse import csr_matrix, issparse
@@ -34,9 +35,23 @@ m_merged = array([
 
 
 def test_row_merge():
-    assert allclose(merge_row_partition(m, partition, 'sum', 1).todense(), m_merge_rows)
+    assert allclose(
+        merge_row_partition(m, partition, lambda m,p: csr_matrix(getattr(m[p, :], 'sum')(axis=0)), 1).todense(),
+        m_merge_rows
+    )
 
-def test_full_merge_loop():
+def test_row_merge_parallel():
+    assert allclose(
+        merge_row_partition(m, partition, lambda m,p: csr_matrix(getattr(m[p, :], 'sum')(axis=0)), -1).todense(),
+        m_merge_rows
+    )
+
+
+def test_quotient_wrong_agg():
+    with pytest.raises(ValueError):
+        quotient_similarity(m, partition, agg='ABCD', n_cpu=1)
+
+def test_quotient_loop():
     assert allclose(quotient_similarity(m, partition, agg='sum', n_cpu=1).todense(), m_merged)
 
 def test_full_merge_parallel():
