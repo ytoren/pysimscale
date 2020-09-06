@@ -29,10 +29,11 @@ def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None,
     if metric == 'hamming':
         m = (1.0 * matmul(a[ind_range], a.T) + matmul((1 - a[ind_range]), (1 - a).T)) / a.shape[1]
     elif metric == 'cosine':
-        a = a / norm(a, ord=2, axis=1).reshape(a.shape[0], 1)
+        if normalized:
+            a = a / norm(a, ord=2, axis=1).reshape(a.shape[0], 1)
         m = matmul(a[ind_range], a.T)
     elif callable(metric):
-        m = metric(a[ind_range])
+        m = metric(a[ind_range], a)
     else:
         raise ValueError('Invalid value of `metric` parameter. Please use one of the built-in options of specify a function (see documentation)')
 
@@ -79,7 +80,7 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
     blocks = [l[i:(i + block_size)] for i in range(0, a.shape[0], block_size)]
 
     if n_jobs == 1 or DEFAULT_CPUS == 1:
-        if DEFAULT_CPUS == 1:
+        if DEFAULT_CPUS == 1 and n_jobs != 1:
             print('Could not find `joblib` library. Falling back to simple loops')
 
         sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
