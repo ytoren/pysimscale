@@ -1,11 +1,8 @@
-__all__ = ['truncated_sparse_similarity']
-
+from importlib.util import find_spec
 from scipy.sparse import coo_matrix, vstack
 from numpy import matmul, isnan, clip
 from numpy.linalg import norm
 from math import ceil
-
-from importlib.util import find_spec
 
 if find_spec('joblib') is not None:
     from joblib import Parallel, delayed, cpu_count
@@ -14,7 +11,7 @@ else:
     print('Could not find `joblib` library. Parallelisation is disabled by default')
     DEFAULT_CPUS = 1
 
-def similarity_sparse_block_(a, ind_range, thresh, metric='hamming', lower=None, binary=False, sparse=True, normalized=True):
+def similarity_sparse_block(a, ind_range, thresh, metric='hamming', binary=False, sparse=True, normalized=True):
     '''Calculate a Hamming similarity matrix (1 - distance) for a subset of indices (against the entire dataset).
 
     params:
@@ -83,10 +80,10 @@ def truncated_sparse_similarity(a, metric='hamming', block_size=1, thresh=0.9, d
         if DEFAULT_CPUS == 1 and n_jobs != 1:
             print('Could not find `joblib` library. Falling back to simple loops')
 
-        sim = [similarity_sparse_block_(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
+        sim = [similarity_sparse_block(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks]
     else:
         with Parallel(n_jobs=n_jobs) as p:
-            f = delayed(similarity_sparse_block_)
+            f = delayed(similarity_sparse_block)
             sim = p(f(a=a, ind_range=b, metric=metric, thresh=thresh, binary=binary) for b in blocks)
 
     sim = vstack(sim)
