@@ -22,7 +22,7 @@ This package contains tools for handling this kind of the above problems.
 
 * Data is numeric (binary, integers or real numbers). For categorical data please convert first (embedding, 1-hot encoding or other methods)
 
-* The $N\times M$ matrix of features ($N$ rows, $M$ features) can be contained in memory and can expose a Numpy array API.
+* The `NxM` matrix of features (`N` rows, `M` features) can be contained in memory and can expose a Numpy array API.
 
 
 ## Installation
