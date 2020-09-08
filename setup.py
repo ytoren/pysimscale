@@ -6,7 +6,7 @@ def readme():
 
 setuptools.setup(
     name="SimScale",
-    version="0.0.1",
+    version="0.1.0",
     author="Yizhar (Izzy) Toren",
     author_email="ytoren+pysimscale@gmail.com",
     description="Large scale similarity matrix calculus (parallelisation & chage of scale)",

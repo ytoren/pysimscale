@@ -65,12 +65,6 @@ print(sim.todense())
 
 The package used for cluster computing is `joblib`, but it is not a dependency by design. When `joblib` is installed, the function will default to parallel calculations (`n_jobs=-1`). However, if the package is not installed then the function will fall back to simple loops, even if you try to force it through the `n_jobs` parameter (this is designed to allow deployment in less-than-ideal cluster environments)
 
-### "One is enough" similarity
-
-If a single connection between the lower-level entities is enough to link the higher level entities (e.g. one similar text is enough to link two users) you can work around a lot of the complexity of the calculations by using the original graph. The key notion is that all the messages that belong to the same user are somehow "similar".
-
-The level of that similarity and how it relates to the text similarity is an open questions, but you can use the function `id_block_matrix` to generate a block matrix with a give value (typically 1) that represents this prior knowledge. Combining this matrix with the text similarity matrix (for example adding and capping values at 1) creates a similarity matrix that can be used for downstream operations (like connected components, clustering, etc.) without the need to reduce the dimension of the problem.
-
 ### Quotient similarity
 
 Let's assume we calculated similarity between a set of text embeddings (say using TF-IDF and cosine similarity) and now we want to "aggregate" those links to calculate similarity between a higher-level entity like "users". We assume we have the one-to-many link user -> texts. By grouping all the rows/columns that belong to the same higher-level entity we can derive higher-level similarity matrix [ref TBD]. We use a "list-of-lists" approach: each higher-level entity is represented as a list of indices from the original matrix, so that in total we have a proper `partition` of the sorted matrix:
@@ -81,6 +75,11 @@ m_users = quotient_similarity(m, partition, agg='sum')
 
 The parameter `agg` is used to decide how we aggregate the values of the original matrix into the higher level matrix (see documentation for the available options).
 
+### "One is enough" similarity
+
+If a single connection between the lower-level entities is enough to link the higher level entities (e.g. one similar text is enough to link two users) you can work around a lot of the complexity of the calculations by using the original graph. The key notion is that all the messages that belong to the same user are somehow "similar".
+
+The level of that similarity and how it relates to the text similarity is an open questions, but you can use the function `id_block_matrix` to generate a block matrix with a give value (typically 1) that represents this prior knowledge. Combining this matrix with the text similarity matrix (for example adding and capping values at 1) creates a similarity matrix that can be used for downstream operations (like connected components, clustering, etc.) without the need to reduce the dimension of the problem.
 
 ### Pandas tools
 
